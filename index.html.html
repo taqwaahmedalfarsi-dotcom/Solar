@@ -1,0 +1,250 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>محاكاة الخلية الشمسية – منحنيات I–V و P–V</title>
+<link href="https://fonts.googleapis.com/css2?family=Tajawal:wght@400;700&display=swap" rel="stylesheet">
+<style>
+:root{--bg:#10161c;--panel:#18212a;--line:#2a3846;--tx:#e6edf3;--mut:#93a4b5;--ac:#f2b705;--bl:#3aa0ff;--rd:#ff5a4f;--gr:#46d39a;color-scheme:dark;box-sizing:border-box;padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px)}
+*{box-sizing:border-box}html,body{margin:0;background:var(--bg);color:var(--tx);font-family:Tajawal,Tahoma,Arial,sans-serif;line-height:1.7}
+body{padding:0 12px 24px;max-width:1200px;margin:auto}
+h1{font-size:1.35rem;margin:14px 0 2px}h2{font-size:1.05rem;margin:0 0 8px;color:var(--ac)}
+p,li{color:var(--mut);font-size:.92rem;margin:4px 0}
+.sec{background:var(--panel);border:1px solid var(--line);border-radius:10px;padding:12px;margin-top:12px}
+.g2{display:grid;grid-template-columns:1fr 1fr;gap:12px}
+@media(max-width:800px){.g2{grid-template-columns:1fr}}
+#c3{position:relative;height:420px;border-radius:8px;overflow:hidden;background:#0b1015;touch-action:none}
+#c3 canvas{width:100%;height:100%;display:block}
+#info{position:absolute;inset:auto 8px 8px 8px;background:#000c;border:1px solid var(--line);border-radius:6px;padding:6px 10px;font-size:.85rem;display:none}
+label{display:block;font-size:.9rem;margin-top:8px}label b{color:var(--ac);float:left;direction:ltr}
+input[type=range]{width:100%;accent-color:var(--ac)}
+button{font:inherit;background:var(--line);color:var(--tx);border:0;border-radius:6px;padding:8px 14px;cursor:pointer}
+button.go{background:var(--ac);color:#111;font-weight:700}button:focus-visible,input:focus-visible{outline:2px solid var(--bl)}
+select{font:inherit;background:#0d141a;color:var(--tx);border:1px solid var(--line);border-radius:6px;padding:6px}
+.row{display:flex;gap:8px;flex-wrap:wrap;margin-top:10px}
+.kv{display:grid;grid-template-columns:repeat(auto-fit,minmax(130px,1fr));gap:8px;margin-top:8px}
+.kv div{background:#0d141a;border:1px solid var(--line);border-radius:6px;padding:6px 10px;font-size:.8rem;color:var(--mut)}
+.kv span{display:block;font-size:1.05rem;color:var(--tx);direction:ltr;text-align:right}
+canvas.ch{width:100%;height:300px;background:#0d141a;border-radius:8px}
+.tw{max-height:330px;overflow:auto}table{width:100%;border-collapse:collapse;direction:ltr;font-size:.85rem}
+th,td{padding:4px 8px;border-bottom:1px solid var(--line);text-align:center}th{color:var(--ac);position:sticky;top:0;background:var(--panel)}
+tr.mp td{background:#f2b70522;color:var(--ac)}
+</style>
+</head>
+<body>
+<h1>محاكاة الخلية الشمسية: دراسة منحنيات I–V و P–V</h1>
+<p>Simulation and Experimental Study of Solar Cell Characteristics Using I–V and P–V Curves</p>
+
+<div class="sec"><h2>أهداف التجربة</h2>
+<ul><li>رسم منحنيي التيار–الجهد والقدرة–الجهد للوح شمسي قدرته 100 W.</li>
+<li>تحديد Voc وIsc ونقطة القدرة العظمى ومعامل الامتلاء والكفاءة.</li>
+<li>دراسة أثر الإشعاع ودرجة الحرارة في خصائص اللوح.</li></ul>
+<p>عند سقوط الضوء على وصلة P-N تُحرِّر الفوتونات ذات الطاقة الأكبر من فجوة الطاقة أزواج إلكترون–فجوة (التأثير الكهروضوئي الداخلي)، ويفصل المجال الكهربائي للوصلة بينها فيمرّ تيار في الدائرة الخارجية.</p></div>
+
+<div class="g2">
+<div class="sec"><h2>الدائرة الكهربائية ثلاثية الأبعاد</h2>
+<div id="c3"><div id="info"></div></div>
+<p>اسحب للتدوير، وبعجلة الفأرة أو القرص للتقريب، وانقر أي عنصر لمعرفة وظيفته. السلك الأحمر موجب والأسود سالب، والنقاط المتحركة تمثل اتجاه التيار.</p></div>
+
+<div class="sec"><h2>لوحة التحكم</h2>
+<label>شدة الإضاءة G <b id="gv"></b></label><input id="G" type="range" min="200" max="1000" step="10" value="1000">
+<label>درجة الحرارة T <b id="tv"></b></label><input id="T" type="range" min="15" max="65" step="1" value="25">
+<label>المقاومة المتغيرة (الحمل) <b id="rv"></b></label><input id="R" type="range" min="0" max="100" step="0.5" value="40">
+<label>عدد الألواح وطريقة التوصيل</label><div class="row" style="margin-top:4px"><select id="np"><option>1</option><option>2</option><option>3</option><option>4</option></select><select id="cm"><option value="s">توالٍ (Series)</option><option value="p">توازٍ (Parallel)</option></select></div>
+<p>للتظليل الجزئي انقر على خلايا اللوح في المشهد 3D (كل 3 أعمدة = مجموعة واحدة بدايود تجاوز).</p>
+<div class="row"><button id="clrsh">مسح التظليل</button><button id="save">حفظ المنحنى للمقارنة</button><button id="clrsv">مسح المحفوظة</button></div>
+<div class="row"><button class="go" id="start">بدء التجربة</button><button id="stop">إيقاف</button><button id="reset">إعادة ضبط</button><button id="csv">تصدير CSV</button></div>
+<div class="kv" id="live"></div></div>
+</div>
+
+<div class="sec"><h2>الخصائص الكهربائية</h2><div class="kv" id="props"></div></div>
+
+<div class="g2">
+<div class="sec"><h2>منحنى I–V</h2><canvas class="ch" id="iv"></canvas></div>
+<div class="sec"><h2>منحنى P–V</h2><canvas class="ch" id="pv"></canvas></div>
+</div>
+<div class="sec"><h2>مقارنة المنحنيات المحفوظة</h2><div id="cmp"></div></div>
+
+<div class="g2">
+<div class="sec"><h2>جدول القراءات</h2><div class="tw"><table><thead><tr><th>#</th><th>V (V)</th><th>I (A)</th><th>P (W)</th></tr></thead><tbody id="tb"></tbody></table></div></div>
+<div class="sec"><h2>النتائج والاستنتاج</h2><div id="concl"></div>
+<p>المعادلات: P = V × I ، FF = (Vmp × Imp) / (Voc × Isc) ، η = Pmax / (G × A). النموذج: دايود واحد مع مقاومة توالٍ ومقاومة تفرّع، ومساحة اللوح 0.7 م².</p></div>
+</div>
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
+<script>
+/* ---------- Physics: single-diode model ---------- */
+const K=1.380649e-23,Q=1.602e-19,NS=36,N=1.3,RS=0.25,RSH=300,VOC0=21.6,ISC0=6.1,AREA=0.7,TR=298.15;
+const IPH0=ISC0*(1+RS/RSH), AR=NS*N*K*TR/Q, I0R=(IPH0-VOC0/RSH)/(Math.exp(VOC0/AR)-1);
+let shade=Array.from({length:9},()=>Array(6).fill(0)),NP=1,CM='s',saved=[],savedCnt=0;
+const shn=()=>shade.flat().reduce((x,y)=>x+y,0);
+function model(G,T){
+  const Tk=T+273.15,a=NS*N*K*Tk/Q/3,rs=RS/3,rsh=RSH/3;
+  const I0=I0R*Math.pow(Tk/TR,3)*Math.exp((1.12*Q/(N*K))*(1/TR-1/Tk));
+  const Iph=(G/1000)*IPH0*(1+0.0005*(T-25));
+  const sub=[0,1,2].map(s=>{let c=0;for(let i=s*3;i<s*3+3;i++)for(let j=0;j<6;j++)c+=shade[i][j];return Iph*(1-0.85*c/18)});
+  const vs=(ip,I)=>{let lo=-0.6,hi=10;for(let k=0;k<40;k++){const m=(lo+hi)/2,e=m+I*rs;(ip-I0*(Math.exp(e/a)-1)-e/rsh-I>0)?lo=m:hi=m}return (lo+hi)/2};
+  const Im=Iph*1.02,pts=[];let prev=null;
+  for(let k=800;k>=0;k--){const I=Im*k/800;let V=0;for(let s=0;s<3;s++)V+=vs(sub[s],I);
+    if(V>=0){if(!pts.length&&prev){const t=prev.V/(prev.V-V);pts.push({V:0,I:prev.I+(I-prev.I)*t})}pts.push({V,I})}prev={V,I}}
+  const sv=CM=='s'?NP:1,si=CM=='p'?NP:1;
+  const curve=pts.map(p=>({V:p.V*sv,I:p.I*si,P:p.V*sv*p.I*si}));
+  const cur=V=>{if(V<=0)return curve[0].I;for(let i=1;i<curve.length;i++)if(curve[i].V>=V){const a0=curve[i-1],b=curve[i],t=(V-a0.V)/((b.V-a0.V)||1);return a0.I+(b.I-a0.I)*t}return 0};
+  const Voc=curve[curve.length-1].V,Isc=curve[0].I;
+  let best={P:0,V:0,I:0};curve.forEach(p=>{if(p.P>best.P)best=p});
+  return {cur,Voc,Isc,curve,mpp:best,FF:best.P/(Voc*Isc),eff:100*best.P/(G*AREA*NP),G,T};
+}
+function cmp(){$('cmp').innerHTML=saved.length?'<div class="tw"><table><thead><tr><th>المنحنى</th><th>Voc (V)</th><th>Isc (A)</th><th>Pmax (W)</th><th>Vmp (V)</th></tr></thead><tbody>'+saved.map(s=>`<tr><td style="color:${s.col}">${s.label}</td><td>${f(s.Voc)}</td><td>${f(s.Isc)}</td><td>${f(s.mpp.P)}</td><td>${f(s.mpp.V)}</td></tr>`).join('')+'</tbody></table></div>':'<p>اضبط الظروف ثم اضغط «حفظ المنحنى للمقارنة»، وغيّر الظروف لترى المنحنيات معاً على الرسمين.</p>'}
+function modelOld(G,T){
+  const Tk=T+273.15,a=NS*N*K*Tk/Q;
+  const I0=I0R*Math.pow(Tk/TR,3)*Math.exp((1.12*Q/(N*K))*(1/TR-1/Tk));
+  const Iph=(G/1000)*IPH0*(1+0.0005*(T-25));
+  const cur=V=>{let lo=-1,hi=Iph+1;for(let i=0;i<60;i++){const m=(lo+hi)/2,e=V+m*RS,f=Iph-I0*(Math.exp(e/a)-1)-e/RSH-m;f>0?lo=m:hi=m}return Math.max(0,(lo+hi)/2)};
+  let lo=0,hi=30;for(let i=0;i<50;i++){const m=(lo+hi)/2;cur(m)>1e-6?lo=m:hi=m}
+  const Voc=lo,Isc=cur(0);
+  const curve=[];let best={P:0,V:0,I:0};
+  for(let i=0;i<=240;i++){const V=Voc*i/240,I=cur(V),P=V*I;curve.push({V,I,P});if(P>best.P)best={P,V,I}}
+  const FF=best.P/(Voc*Isc),eff=100*best.P/(G*AREA);
+  return {cur,Voc,Isc,curve,mpp:best,FF,eff,G,T};
+}
+function opPoint(m,R){let lo=0,hi=m.Voc;for(let i=0;i<50;i++){const v=(lo+hi)/2;m.cur(v)-v/R>0?lo=v:hi=v}const V=(lo+hi)/2;return {V,I:V/R,P:V*V/R}}
+
+/* ---------- State & UI ---------- */
+const $=id=>document.getElementById(id);
+let M=model(1000,25),op={V:0,I:0,P:0},readings=[],running=false,step=0,timer=null;
+const Rof=v=>0.3*Math.pow(200,v/100);
+function ui(){
+  $('gv').textContent=$('G').value+' W/m²';$('tv').textContent=$('T').value+' °C';
+  $('rv').textContent=Rof(+$('R').value).toFixed(2)+' Ω';
+}
+function f(x,d=2){return x.toFixed(d)}
+function recompute(){
+  M=model(+$('G').value,+$('T').value);
+  if(!running)op=opPoint(M,Rof(+$('R').value));
+  if(readings.length&&!running){readings=[];}
+  render();
+}
+function render(){
+  $('live').innerHTML=`<div>الجهد (فولتميتر)<span>${f(op.V)} V</span></div><div>التيار (أميتر)<span>${f(op.I)} A</span></div><div>القدرة<span>${f(op.P)} W</span></div>`;
+  $('props').innerHTML=[['Voc',f(M.Voc)+' V'],['Isc',f(M.Isc)+' A'],['Pmax',f(M.mpp.P)+' W'],['Vmp',f(M.mpp.V)+' V'],['Imp',f(M.mpp.I)+' A'],['FF',f(M.FF,3)],['الكفاءة η',f(M.eff,1)+' %'],['MPP','('+f(M.mpp.V,1)+' V, '+f(M.mpp.I,2)+' A)']].map(x=>`<div>${x[0]}<span>${x[1]}</span></div>`).join('');
+  $('tb').innerHTML=readings.map((r,i)=>`<tr class="${r.mp?'mp':''}"><td>${i+1}</td><td>${f(r.V)}</td><td>${f(r.I,3)}</td><td>${f(r.P)}</td></tr>`).join('')||'<tr><td colspan="4">اضغط «بدء التجربة» لتسجيل القراءات.</td></tr>';
+  const g=M.G,t=M.T;
+  $('concl').innerHTML=`<p>(${NP} لوح ${CM=='s'?'توالٍ':'توازٍ'}، ${shn()} خلية مظللة) عند G = ${g} W/m² وT = ${t} °C: Voc = ${f(M.Voc)} V وIsc = ${f(M.Isc)} A وPmax = ${f(M.mpp.P)} W عند Vmp = ${f(M.mpp.V)} V.</p>
+  <p>يتناسب Isc تقريباً مع الإشعاع (${f(M.Isc/(ISC0*(CM=='p'?NP:1))*100,0)}% من القيمة المرجعية)، بينما تنخفض Voc بنحو ${f((VOC0*(CM=='s'?NP:1)-M.Voc),2)} V مقارنة بـ 25 °C/1000 W/m² نتيجة تأثر تيار التشبع العكسي بالحرارة. معامل الامتلاء ${f(M.FF,3)} يدل على جودة الخلية، والكفاءة ${f(M.eff,1)}%.</p>
+  <p>النقطة التشغيلية الحالية تعطي ${f(op.P)} W أي ${f(op.P/M.mpp.P*100,0)}% من القدرة العظمى؛ اضبط الحمل قرب ${f(M.mpp.V/M.mpp.I)} Ω للوصول إلى MPP.</p>`;
+  drawChart($('iv'),'I',"V (V)","I (A)");drawChart($('pv'),'P',"V (V)","P (W)");
+  updMeters();
+}
+function drawChart(cv,key,xl,yl){
+  const dpr=window.devicePixelRatio||1,w=cv.clientWidth,h=cv.clientHeight;cv.width=w*dpr;cv.height=h*dpr;
+  const c=cv.getContext('2d');c.scale(dpr,dpr);c.clearRect(0,0,w,h);
+  const L=46,B=34,Tp=14,Rt=14,all=[M,...saved],nice=v=>{const p=Math.pow(10,Math.floor(Math.log10(v))),m=v/p;return p*(m<=1?1:m<=2?2:m<=5?5:10)},xm=nice(Math.max(...all.map(s=>s.Voc))*1.02),ym=nice(Math.max(...all.map(s=>key=='I'?s.Isc:s.mpp.P))*1.08);
+  const X=v=>L+(v/xm)*(w-L-Rt),Y=v=>h-B-(v/ym)*(h-B-Tp);
+  c.font='11px Tajawal,sans-serif';c.direction='ltr';c.strokeStyle='#2a3846';c.fillStyle='#93a4b5';c.lineWidth=1;
+  for(let i=0;i<=5;i++){const xv=xm*i/5,yv=ym*i/5;c.beginPath();c.moveTo(X(xv),Tp);c.lineTo(X(xv),h-B);c.moveTo(L,Y(yv));c.lineTo(w-Rt,Y(yv));c.stroke();c.fillText(xv.toFixed(0),X(xv)-6,h-B+14);c.fillText(yv.toFixed(key=='I'?1:0),8,Y(yv)+4)}
+  c.fillText(xl,w/2-20,h-6);c.fillText(yl,8,10);
+  saved.forEach((s,i)=>{c.strokeStyle=s.col;c.lineWidth=2;c.beginPath();s.curve.forEach((p,j)=>{j?c.lineTo(X(p.V),Y(p[key])):c.moveTo(X(p.V),Y(p[key]))});c.stroke();c.fillStyle=s.col;c.fillText(s.label,w-Rt-190,Tp+12+i*13)});
+  c.strokeStyle=key=='I'?'#3aa0ff':'#46d39a';c.lineWidth=2.5;c.beginPath();
+  M.curve.forEach((p,i)=>{i?c.lineTo(X(p.V),Y(p[key])):c.moveTo(X(p.V),Y(p[key]))});c.stroke();
+  const dot=(x,y,col,r=5)=>{c.fillStyle=col;c.beginPath();c.arc(x,y,r,0,7);c.fill()};
+  readings.forEach(r=>dot(X(r.V),Y(r[key]),'#fff',3.5));
+  const mp=M.mpp;dot(X(mp.V),Y(mp[key]),'#f2b705',6);
+  c.fillStyle='#f2b705';c.fillText('MPP ('+f(mp.V,1)+', '+f(mp[key],key=='I'?2:1)+')',Math.min(X(mp.V)+8,w-130),Y(mp[key])-8);
+  if(key=='I'){dot(X(0),Y(M.Isc),'#ff5a4f');c.fillStyle='#ff5a4f';c.fillText('Isc',X(0)+8,Y(M.Isc)-6);dot(X(M.Voc),Y(0),'#ff5a4f');c.fillText('Voc',X(M.Voc)-26,Y(0)-8)}
+  else{c.fillStyle='#ff5a4f';c.fillText('Pmax = '+f(mp.P,1)+' W   Vmp = '+f(mp.V,1)+' V',L+10,Tp+12)}
+  dot(X(op.V),Y(op[key]),'#ff5a4f',4.5);
+}
+
+/* ---------- Experiment ---------- */
+const NPT=13;
+$('start').onclick=()=>{clearInterval(timer);readings=[];step=0;running=true;
+  timer=setInterval(()=>{
+    const V=M.Voc*step/(NPT-1)*(step==NPT-1?1:0.999),I=M.cur(V);
+    op={V,I,P:V*I};readings.push({V,I,P:V*I});
+    const R=I>0.02?V/I:60;$('R').value=Math.min(100,Math.max(0,100*Math.log(Math.max(R,0.3)/0.3)/Math.log(200)));ui();
+    if(++step>=NPT){clearInterval(timer);running=false;const mx=Math.max(...readings.map(r=>r.P));readings.forEach(r=>r.mp=r.P==mx)}
+    render()},450)};
+$('stop').onclick=()=>{clearInterval(timer);running=false};
+$('reset').onclick=()=>{clearInterval(timer);running=false;readings=[];$('G').value=1000;$('T').value=25;$('R').value=40;$('np').value=1;$('cm').value='s';NP=1;CM='s';shade.forEach(r=>r.fill(0));cells.forEach(paintCell);setPanels();ui();recompute()};
+$('csv').onclick=()=>{const rows=readings.length?readings:M.curve.filter((_,i)=>i%20==0);
+  const t='n,V,I,P\n'+rows.map((r,i)=>[i+1,f(r.V,3),f(r.I,3),f(r.P,3)].join(',')).join('\n');
+  const a=document.createElement('a');a.href=URL.createObjectURL(new Blob([t],{type:'text/csv'}));a.download='solar_iv_data.csv';a.click()};
+['G','T','R'].forEach(id=>$(id).oninput=()=>{if(running){clearInterval(timer);running=false}ui();recompute()});
+$('np').onchange=$('cm').onchange=()=>{NP=+$('np').value;CM=$('cm').value;if(running){clearInterval(timer);running=false}setPanels();recompute()};
+$('clrsh').onclick=()=>{shade.forEach(r=>r.fill(0));cells.forEach(paintCell);recompute()};
+$('save').onclick=()=>{if(saved.length>=6)saved.shift();const cols=['#ff7b72','#d2a8ff','#79c0ff','#ffa657','#7ee787','#f778ba'];saved.push({curve:M.curve,Voc:M.Voc,Isc:M.Isc,mpp:M.mpp,col:cols[(savedCnt++)%6],label:`${M.G}W/m², ${M.T}°C, ${NP}${CM=='s'?'S':'P'}${shn()?', shade '+shn():''}`});cmp();render()};
+$('clrsv').onclick=()=>{saved=[];cmp();render()};
+
+/* ---------- 3D scene ---------- */
+const host=$('c3'),renderer=new THREE.WebGLRenderer({antialias:true});
+renderer.setPixelRatio(Math.min(2,devicePixelRatio));renderer.shadowMap.enabled=true;host.appendChild(renderer.domElement);
+const scene=new THREE.Scene();scene.background=new THREE.Color(0x0b1015);
+const cam=new THREE.PerspectiveCamera(45,1,0.1,100);
+let th=0.75,ph=1.0,rad=11;const tgt=new THREE.Vector3(0,0.6,0);
+function setCam(){cam.position.set(tgt.x+rad*Math.sin(ph)*Math.sin(th),tgt.y+rad*Math.cos(ph),tgt.z+rad*Math.sin(ph)*Math.cos(th));cam.lookAt(tgt)}
+scene.add(new THREE.AmbientLight(0x8899aa,0.55));
+const lamp=new THREE.SpotLight(0xfff2cc,1.4,14,0.9,0.5);lamp.position.set(0,4.2,-1.5);lamp.target.position.set(0,0,-1.5);lamp.castShadow=true;scene.add(lamp,lamp.target);
+const mat=(c,o={})=>new THREE.MeshStandardMaterial(Object.assign({color:c,roughness:.6,metalness:.1},o));
+const box=(w,h,d,c,x,y,z)=>{const m=new THREE.Mesh(new THREE.BoxGeometry(w,h,d),mat(c));m.position.set(x,y,z);m.castShadow=m.receiveShadow=true;scene.add(m);return m};
+const table=box(11,0.3,7,0x6b4a2f,0,-0.15,0);
+function label(txt,x,y,z){const cv=document.createElement('canvas');cv.width=256;cv.height=64;const c=cv.getContext('2d');c.fillStyle='#000a';c.fillRect(0,0,256,64);c.fillStyle='#fff';c.font='bold 26px sans-serif';c.textAlign='center';c.fillText(txt,128,42);
+  const s=new THREE.Sprite(new THREE.SpriteMaterial({map:new THREE.CanvasTexture(cv),depthTest:false}));s.scale.set(1.8,0.45,1);s.position.set(x,y,z);s.renderOrder=9;scene.add(s)}
+const clickable=[];const tag=(m,t)=>{m.userData.info=t;clickable.push(m)};
+/* panel */
+const panel=box(3.2,0.12,2.2,0xc0c8d0,0,0.1,-1.5);tag(panel,'اللوح الشمسي (Solar Panel): يحوّل الضوء إلى كهرباء عبر وصلات P-N؛ 100 W اسمياً.');
+const cells=[];function paintCell(c){const [i,j]=c.userData.cell;c.material.color.setHex(shade[i][j]?0xb0b0a0:0x14307a)}
+for(let i=0;i<9;i++)for(let j=0;j<6;j++){const c=new THREE.Mesh(new THREE.BoxGeometry(0.3,0.02,0.3),mat(0x14307a,{roughness:.25,metalness:.5}));c.position.set(-1.2+i*0.3,0.17,-2.3+j*0.31+0.05);scene.add(c);c.userData.cell=[i,j];cells.push(c);tag(c,'خلية شمسية: انقر لتظليلها أو إزالة التظليل (المجموعة '+(Math.floor(i/3)+1)+' من 3 مجموعات بدايود تجاوز).')}
+/* lamp */
+const stand=box(0.1,4,0.1,0x888888,-2.2,2,-2.8);box(2.4,0.08,0.08,0x888888,-1,4,-2.8);box(0.08,0.08,1.4,0x888888,0.2,4,-2.15);
+const bulb=new THREE.Mesh(new THREE.SphereGeometry(0.28,24,16),new THREE.MeshStandardMaterial({color:0xffee99,emissive:0xffcc33,emissiveIntensity:1}));bulb.position.set(0,3.9,-1.5);scene.add(bulb);tag(bulb,'مصدر الضوء (Light Source): يوفّر الإشعاع G المسلَّط على اللوح.');
+const hood=new THREE.Mesh(new THREE.ConeGeometry(0.5,0.35,24,1,true),mat(0x333333,{side:THREE.DoubleSide}));hood.position.set(0,4.15,-1.5);scene.add(hood);
+const rays=new THREE.Group();for(let i=0;i<14;i++){const a=i/14*6.283,r=1.1,g=new THREE.BufferGeometry().setFromPoints([new THREE.Vector3(Math.cos(a)*0.1,3.7,-1.5+Math.sin(a)*0.1),new THREE.Vector3(Math.cos(a)*r,0.3,-1.5+Math.sin(a)*r*0.8)]);rays.add(new THREE.Line(g,new THREE.LineBasicMaterial({color:0xffdd55,transparent:true,opacity:.5})))}scene.add(rays);
+/* meters */
+function meter(x,col,name,info){box(1.4,0.6,0.9,0x2b3138,x,0.3,1.4);const cv=document.createElement('canvas');cv.width=256;cv.height=96;const tx=new THREE.CanvasTexture(cv);
+  const s=new THREE.Mesh(new THREE.PlaneGeometry(1.1,0.42),new THREE.MeshBasicMaterial({map:tx}));s.rotation.x=-Math.PI/2.8;s.position.set(x,0.62,1.45);scene.add(s);tag(s,info);
+  label(name,x,1.5,1.4);return {cv,tx,col}}
+const am=meter(-2.5,'#46d39a','Ammeter (A)','الأميتر (Ammeter): يُوصل على التوالي لقياس تيار الدائرة.');
+const vm=meter(3.2,'#3aa0ff','Voltmeter (V)','الفولتميتر (Voltmeter): يُوصل على التفرع مع اللوح لقياس جهد خرجه.');
+function show(m,txt,u){const c=m.cv.getContext('2d');c.fillStyle='#04120a';c.fillRect(0,0,256,96);c.fillStyle=m.col;c.font='bold 46px monospace';c.textAlign='center';c.fillText(txt,110,62);c.font='bold 28px monospace';c.fillText(u,226,62);m.tx.needsUpdate=true}
+function updMeters(){show(am,op.I.toFixed(2),'A');show(vm,op.V.toFixed(2),'V')}
+/* rheostat */
+const rh=box(2,0.5,0.9,0x7a4a22,0.4,0.25,1.4);tag(rh,'المقاومة المتغيرة / الحمل (Variable Resistor): تغيير مقاومتها يحرّك نقطة التشغيل على منحنى I–V.');
+const coil=new THREE.Mesh(new THREE.CylinderGeometry(0.3,0.3,1.2,24),mat(0xb87333,{metalness:.8,roughness:.35}));coil.rotation.z=Math.PI/2;coil.position.set(0.4,0.62,1.4);scene.add(coil);tag(coil,rh.userData.info);
+const knob=new THREE.Mesh(new THREE.CylinderGeometry(0.2,0.2,0.18,20),mat(0x111111));knob.position.set(0.4,0.98,1.4);scene.add(knob);const ptr=box(0.04,0.2,0.2,0xffffff,0,0.1,-0.09);knob.add(ptr);ptr.position.set(0,0.1,-0.1);tag(knob,'مقبض المقاومة المتغيرة: يتحكم في قيمة الحمل (0.3–60 Ω).');
+label('Variable Resistor / Load',0.4,1.5,1.4);label('Light Source',0,4.7,-1.5);label('Solar Panel',0,1.0,-1.5);
+const extra=[];for(let i=0;i<3;i++){const m=new THREE.Mesh(new THREE.BoxGeometry(1.3,0.08,0.6),mat(0x14307a,{roughness:.25,metalness:.5}));m.position.set(-0.9+i*1.5,0.1,-3.1);scene.add(m);tag(m,'لوح شمسي إضافي (بنفس مواصفات اللوح الأول).');extra.push(m)}
+const cl=document.createElement('canvas');cl.width=256;cl.height=64;const clt=new THREE.CanvasTexture(cl),cs=new THREE.Sprite(new THREE.SpriteMaterial({map:clt,depthTest:false}));cs.scale.set(2.4,0.6,1);cs.position.set(1.2,0.9,-3.1);scene.add(cs);
+function setPanels(){extra.forEach((m,i)=>m.visible=i<NP-1);cs.visible=NP>1;const c=cl.getContext('2d');c.clearRect(0,0,256,64);c.fillStyle='#000a';c.fillRect(0,0,256,64);c.fillStyle='#ffd34d';c.font='bold 24px sans-serif';c.textAlign='center';c.fillText(NP+' panels - '+(CM=='s'?'Series':'Parallel'),128,40);clt.needsUpdate=true}
+/* terminals & wires */
+const T=(p,c,t)=>{const m=new THREE.Mesh(new THREE.CylinderGeometry(0.07,0.07,0.1,12),mat(c));m.position.set(...p);scene.add(m);label(t,p[0],p[1]+0.25,p[2]);return new THREE.Vector3(...p)};
+const Pp=T([-1,0.25,-0.4],0xff3b30,'+'),Pn=T([1,0.25,-0.4],0x222222,'−'),Ain=T([-3,0.7,1],0xff3b30,'+'),Aout=T([-2,0.7,1],0x222222,'−'),Rin=T([-0.4,0.8,1],0xff3b30,''),Rout=T([1.2,0.8,1],0x222222,''),Vp=T([2.7,0.7,1],0xff3b30,'+'),Vn=T([3.7,0.7,1],0x222222,'−');
+const wires=[];
+function wire(a,b,col,lift,flow){const mid=a.clone().lerp(b,.5);mid.y+=lift;const cur=new THREE.CatmullRomCurve3([a,a.clone().add(new THREE.Vector3(0,.25,0)),mid,b.clone().add(new THREE.Vector3(0,.25,0)),b]);
+  const m=new THREE.Mesh(new THREE.TubeGeometry(cur,40,0.035,8),mat(col));scene.add(m);tag(m,col==0xd62828?'سلك توصيل أحمر (موجب).':'سلك توصيل أسود (سالب).');
+  if(flow){const ps=[];for(let i=0;i<14;i++){const p=new THREE.Mesh(new THREE.SphereGeometry(0.06,8,8),new THREE.MeshBasicMaterial({color:0xffe066}));p.userData.t=i/14;scene.add(p);ps.push(p)}wires.push({cur,ps})}}
+const RD=0xd62828,BK=0x1a1a1a;
+wire(Pp,Ain,RD,0.5,true);wire(Aout,Rin,RD,0.4,true);wire(Rout,Pn,BK,0.6,true);wire(Pp,Vp,RD,1.1,false);wire(Pn,Vn,BK,0.9,false);
+/* orbit controls */
+const cvs=renderer.domElement,ptrs=new Map();let moved=0,pd=0;
+cvs.addEventListener('pointerdown',e=>{cvs.setPointerCapture(e.pointerId);ptrs.set(e.pointerId,[e.clientX,e.clientY]);moved=0;pd=ptrs.size==2?Math.hypot(...[...ptrs.values()].reduce((a,b)=>[a[0]-b[0],a[1]-b[1]]))||0:0});
+cvs.addEventListener('pointermove',e=>{if(!ptrs.has(e.pointerId))return;const o=ptrs.get(e.pointerId),dx=e.clientX-o[0],dy=e.clientY-o[1];ptrs.set(e.pointerId,[e.clientX,e.clientY]);moved+=Math.abs(dx)+Math.abs(dy);
+  if(ptrs.size==1){th-=dx*0.007;ph=Math.min(1.5,Math.max(0.2,ph-dy*0.007))}else if(ptrs.size==2){const v=[...ptrs.values()],d=Math.hypot(v[0][0]-v[1][0],v[0][1]-v[1][1]);if(pd)rad=Math.min(20,Math.max(4,rad*pd/d));pd=d}});
+cvs.addEventListener('pointerup',e=>{ptrs.delete(e.pointerId);if(moved<6)pick(e)});cvs.addEventListener('pointercancel',e=>ptrs.delete(e.pointerId));
+cvs.addEventListener('wheel',e=>{e.preventDefault();rad=Math.min(20,Math.max(4,rad*(1+e.deltaY*0.001)))},{passive:false});
+const rc=new THREE.Raycaster(),inf=$('info');
+function pick(e){const r=cvs.getBoundingClientRect();rc.setFromCamera(new THREE.Vector2((e.clientX-r.left)/r.width*2-1,-(e.clientY-r.top)/r.height*2+1),cam);
+  const h=rc.intersectObjects(clickable)[0];if(h){const o=h.object;if(o.userData.cell){const [i,j]=o.userData.cell;shade[i][j]^=1;paintCell(o);if(running){clearInterval(timer);running=false}recompute()}inf.textContent=o.userData.info;inf.style.display='block'}else inf.style.display='none'}
+function resize(){const w=host.clientWidth,h=host.clientHeight;renderer.setSize(w,h);cam.aspect=w/h;cam.updateProjectionMatrix();render()}
+addEventListener('resize',resize);
+let clock=0;
+function loop(){requestAnimationFrame(loop);clock+=0.016;
+  const k=M.G/1000,sp=op.I/6.1*0.25;
+  lamp.intensity=0.5+1.3*k;bulb.material.emissiveIntensity=0.3+0.9*k;rays.children.forEach(l=>l.material.opacity=0.12+0.5*k);
+  knob.rotation.y=-(+$('R').value)*0.05;
+  wires.forEach(w=>w.ps.forEach(p=>{p.userData.t=(p.userData.t+sp*0.04)%1;p.position.copy(w.cur.getPoint(p.userData.t));p.visible=op.I>0.02}));
+  setCam();renderer.render(scene,cam)}
+ui();resize();recompute();cmp();setPanels();loop();
+</script>
+</body>
+</html>
